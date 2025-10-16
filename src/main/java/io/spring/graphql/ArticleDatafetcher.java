@@ -27,7 +27,7 @@ import io.spring.graphql.types.Article;
 import io.spring.graphql.types.ArticleEdge;
 import io.spring.graphql.types.ArticlesConnection;
 import io.spring.graphql.types.Profile;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.joda.time.format.ISODateTimeFormat;
@@ -35,6 +35,8 @@ import org.joda.time.format.ISODateTimeFormat;
 @DgsComponent
 @AllArgsConstructor
 public class ArticleDatafetcher {
+
+  private static final String PAGINATION_ERROR_MESSAGE = "Either 'first' or 'last' parameter must be provided, but not both";
 
   private ArticleQueryService articleQueryService;
   private UserRepository userRepository;
@@ -47,7 +49,7 @@ public class ArticleDatafetcher {
       @InputArgument("before") String before,
       DgsDataFetchingEnvironment dfe) {
     if (first == null && last == null) {
-      throw new IllegalArgumentException("first 和 last 必须只存在一个");
+      throw new IllegalArgumentException(PAGINATION_ERROR_MESSAGE);
     }
 
     User current = SecurityUtil.getCurrentUser().orElse(null);
@@ -93,7 +95,7 @@ public class ArticleDatafetcher {
       @InputArgument("before") String before,
       DgsDataFetchingEnvironment dfe) {
     if (first == null && last == null) {
-      throw new IllegalArgumentException("first 和 last 必须只存在一个");
+      throw new IllegalArgumentException(PAGINATION_ERROR_MESSAGE);
     }
 
     Profile profile = dfe.getSource();
@@ -143,7 +145,7 @@ public class ArticleDatafetcher {
       @InputArgument("before") String before,
       DgsDataFetchingEnvironment dfe) {
     if (first == null && last == null) {
-      throw new IllegalArgumentException("first 和 last 必须只存在一个");
+      throw new IllegalArgumentException(PAGINATION_ERROR_MESSAGE);
     }
 
     User current = SecurityUtil.getCurrentUser().orElse(null);
@@ -197,7 +199,7 @@ public class ArticleDatafetcher {
       @InputArgument("before") String before,
       DgsDataFetchingEnvironment dfe) {
     if (first == null && last == null) {
-      throw new IllegalArgumentException("first 和 last 必须只存在一个");
+      throw new IllegalArgumentException(PAGINATION_ERROR_MESSAGE);
     }
 
     User current = SecurityUtil.getCurrentUser().orElse(null);
@@ -253,7 +255,7 @@ public class ArticleDatafetcher {
       @InputArgument("withTag") String withTag,
       DgsDataFetchingEnvironment dfe) {
     if (first == null && last == null) {
-      throw new IllegalArgumentException("first 和 last 必须只存在一个");
+      throw new IllegalArgumentException(PAGINATION_ERROR_MESSAGE);
     }
 
     User current = SecurityUtil.getCurrentUser().orElse(null);
@@ -308,12 +310,7 @@ public class ArticleDatafetcher {
             .orElseThrow(ResourceNotFoundException::new);
     Article articleResult = buildArticleResult(articleData);
     return DataFetcherResult.<Article>newResult()
-        .localContext(
-            new HashMap<String, Object>() {
-              {
-                put(articleData.getSlug(), articleData);
-              }
-            })
+        .localContext(Map.of(articleData.getSlug(), articleData))
         .data(articleResult)
         .build();
   }
@@ -329,12 +326,7 @@ public class ArticleDatafetcher {
             .orElseThrow(ResourceNotFoundException::new);
     Article articleResult = buildArticleResult(articleData);
     return DataFetcherResult.<Article>newResult()
-        .localContext(
-            new HashMap<String, Object>() {
-              {
-                put(articleData.getSlug(), articleData);
-              }
-            })
+        .localContext(Map.of(articleData.getSlug(), articleData))
         .data(articleResult)
         .build();
   }
@@ -346,12 +338,7 @@ public class ArticleDatafetcher {
         articleQueryService.findBySlug(slug, current).orElseThrow(ResourceNotFoundException::new);
     Article articleResult = buildArticleResult(articleData);
     return DataFetcherResult.<Article>newResult()
-        .localContext(
-            new HashMap<String, Object>() {
-              {
-                put(articleData.getSlug(), articleData);
-              }
-            })
+        .localContext(Map.of(articleData.getSlug(), articleData))
         .data(articleResult)
         .build();
   }
