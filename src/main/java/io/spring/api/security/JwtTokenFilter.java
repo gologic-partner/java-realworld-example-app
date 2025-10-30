@@ -1,10 +1,11 @@
 package io.spring.api.security;
 
+import static io.spring.api.security.TokenExtractor.extractToken;
+
 import io.spring.core.service.JwtService;
 import io.spring.core.user.UserRepository;
 import java.io.IOException;
 import java.util.Collections;
-import java.util.Optional;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -17,15 +18,17 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 @SuppressWarnings("SpringJavaAutowiringInspection")
 public class JwtTokenFilter extends OncePerRequestFilter {
+
+  private static final String AUTHORIZATION_HEADER = "Authorization";
+
   @Autowired private UserRepository userRepository;
   @Autowired private JwtService jwtService;
-  private final String header = "Authorization";
 
   @Override
   protected void doFilterInternal(
       HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
       throws ServletException, IOException {
-    getTokenString(request.getHeader(header))
+    extractToken(request.getHeader(AUTHORIZATION_HEADER))
         .flatMap(token -> jwtService.getSubFromToken(token))
         .ifPresent(
             id -> {
@@ -45,18 +48,5 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             });
 
     filterChain.doFilter(request, response);
-  }
-
-  private Optional<String> getTokenString(String header) {
-    if (header == null) {
-      return Optional.empty();
-    } else {
-      String[] split = header.split(" ");
-      if (split.length < 2) {
-        return Optional.empty();
-      } else {
-        return Optional.ofNullable(split[1]);
-      }
-    }
   }
 }
