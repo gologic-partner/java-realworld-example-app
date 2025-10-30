@@ -36,6 +36,8 @@ import org.joda.time.format.ISODateTimeFormat;
 @AllArgsConstructor
 public class ArticleDatafetcher {
 
+  private static final String PAGINATION_PARAM_ERROR = "first 和 last 必须只存在一个";
+
   private ArticleQueryService articleQueryService;
   private UserRepository userRepository;
 
@@ -46,9 +48,7 @@ public class ArticleDatafetcher {
       @InputArgument("last") Integer last,
       @InputArgument("before") String before,
       DgsDataFetchingEnvironment dfe) {
-    if (first == null && last == null) {
-      throw new IllegalArgumentException("first 和 last 必须只存在一个");
-    }
+    validatePaginationParams(first, last);
 
     User current = SecurityUtil.getCurrentUser().orElse(null);
 
@@ -92,9 +92,7 @@ public class ArticleDatafetcher {
       @InputArgument("last") Integer last,
       @InputArgument("before") String before,
       DgsDataFetchingEnvironment dfe) {
-    if (first == null && last == null) {
-      throw new IllegalArgumentException("first 和 last 必须只存在一个");
-    }
+    validatePaginationParams(first, last);
 
     Profile profile = dfe.getSource();
     User target =
@@ -142,9 +140,7 @@ public class ArticleDatafetcher {
       @InputArgument("last") Integer last,
       @InputArgument("before") String before,
       DgsDataFetchingEnvironment dfe) {
-    if (first == null && last == null) {
-      throw new IllegalArgumentException("first 和 last 必须只存在一个");
-    }
+    validatePaginationParams(first, last);
 
     User current = SecurityUtil.getCurrentUser().orElse(null);
     Profile profile = dfe.getSource();
@@ -196,9 +192,7 @@ public class ArticleDatafetcher {
       @InputArgument("last") Integer last,
       @InputArgument("before") String before,
       DgsDataFetchingEnvironment dfe) {
-    if (first == null && last == null) {
-      throw new IllegalArgumentException("first 和 last 必须只存在一个");
-    }
+    validatePaginationParams(first, last);
 
     User current = SecurityUtil.getCurrentUser().orElse(null);
     Profile profile = dfe.getSource();
@@ -252,9 +246,7 @@ public class ArticleDatafetcher {
       @InputArgument("favoritedBy") String favoritedBy,
       @InputArgument("withTag") String withTag,
       DgsDataFetchingEnvironment dfe) {
-    if (first == null && last == null) {
-      throw new IllegalArgumentException("first 和 last 必须只存在一个");
-    }
+    validatePaginationParams(first, last);
 
     User current = SecurityUtil.getCurrentUser().orElse(null);
 
@@ -380,5 +372,11 @@ public class ArticleDatafetcher {
         .title(articleData.getTitle())
         .updatedAt(ISODateTimeFormat.dateTime().withZoneUTC().print(articleData.getUpdatedAt()))
         .build();
+  }
+
+  private void validatePaginationParams(Integer first, Integer last) {
+    if (first == null && last == null) {
+      throw new IllegalArgumentException(PAGINATION_PARAM_ERROR);
+    }
   }
 }
