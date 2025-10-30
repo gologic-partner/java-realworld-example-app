@@ -45,15 +45,19 @@ public class UsersApi {
 
   @RequestMapping(path = "/users/login", method = POST)
   public ResponseEntity userLogin(@Valid @RequestBody LoginParam loginParam) {
-    Optional<User> optional = userRepository.findByEmail(loginParam.getEmail());
-    if (optional.isPresent()
-        && passwordEncoder.matches(loginParam.getPassword(), optional.get().getPassword())) {
-      UserData userData = userQueryService.findById(optional.get().getId()).get();
-      return ResponseEntity.ok(
-          userResponse(new UserWithToken(userData, jwtService.toToken(optional.get()))));
-    } else {
+    Optional<User> userOptional = userRepository.findByEmail(loginParam.getEmail());
+    if (!userOptional.isPresent()) {
       throw new InvalidAuthenticationException();
     }
+
+    User user = userOptional.get();
+    if (!passwordEncoder.matches(loginParam.getPassword(), user.getPassword())) {
+      throw new InvalidAuthenticationException();
+    }
+
+    UserData userData = userQueryService.findById(user.getId()).get();
+    return ResponseEntity.ok(
+        userResponse(new UserWithToken(userData, jwtService.toToken(user))));
   }
 }
 

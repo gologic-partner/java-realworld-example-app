@@ -53,20 +53,17 @@ public class ProfileApi {
   @DeleteMapping(path = "follow")
   public ResponseEntity unfollow(
       @PathVariable("username") String username, @AuthenticationPrincipal User user) {
-    Optional<User> userOptional = userRepository.findByUsername(username);
-    if (userOptional.isPresent()) {
-      User target = userOptional.get();
-      return userRepository
-          .findRelation(user.getId(), target.getId())
-          .map(
-              relation -> {
-                userRepository.removeRelation(relation);
-                return ResponseEntity.ok(
-                    profileResponse(profileQueryService.findByUsername(username, user).get()));
-              })
-          .orElseThrow(ResourceNotFoundException::new);
-    } else {
-      throw new ResourceNotFoundException();
-    }
+    User target = userRepository.findByUsername(username)
+        .orElseThrow(ResourceNotFoundException::new);
+    
+    return userRepository
+        .findRelation(user.getId(), target.getId())
+        .map(
+            relation -> {
+              userRepository.removeRelation(relation);
+              return ResponseEntity.ok(
+                  profileResponse(profileQueryService.findByUsername(username, user).get()));
+            })
+        .orElseThrow(ResourceNotFoundException::new);
   }
 }

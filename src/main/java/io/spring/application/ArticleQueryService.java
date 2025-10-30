@@ -31,24 +31,24 @@ public class ArticleQueryService {
     ArticleData articleData = articleReadService.findById(id);
     if (articleData == null) {
       return Optional.empty();
-    } else {
-      if (user != null) {
-        fillExtraInfo(id, user, articleData);
-      }
-      return Optional.of(articleData);
     }
+
+    if (user != null) {
+      fillExtraInfo(id, user, articleData);
+    }
+    return Optional.of(articleData);
   }
 
   public Optional<ArticleData> findBySlug(String slug, User user) {
     ArticleData articleData = articleReadService.findBySlug(slug);
     if (articleData == null) {
       return Optional.empty();
-    } else {
-      if (user != null) {
-        fillExtraInfo(articleData.getId(), user, articleData);
-      }
-      return Optional.of(articleData);
     }
+
+    if (user != null) {
+      fillExtraInfo(articleData.getId(), user, articleData);
+    }
+    return Optional.of(articleData);
   }
 
   public CursorPager<ArticleData> findRecentArticlesWithCursor(
@@ -59,100 +59,100 @@ public class ArticleQueryService {
           User currentUser) {
     List<String> articleIds =
             articleReadService.findArticlesWithCursor(tag, author, favoritedBy, page);
-    if (articleIds.size() == 0) {
+    if (articleIds.isEmpty()) {
       return new CursorPager<>(new ArrayList<>(), page.getDirection(), false);
-    } else {
-      boolean hasExtra = articleIds.size() > page.getLimit();
-      if (hasExtra) {
-        articleIds.remove(page.getLimit());
-      }
-      if (!page.isNext()) {
-        Collections.reverse(articleIds);
-      }
-
-      List<ArticleData> articles = articleReadService.findArticles(articleIds);
-      fillExtraInfo(articles, currentUser);
-
-      return new CursorPager<>(articles, page.getDirection(), hasExtra);
     }
+
+    boolean hasExtra = articleIds.size() > page.getLimit();
+    if (hasExtra) {
+      articleIds.remove(page.getLimit());
+    }
+    if (!page.isNext()) {
+      Collections.reverse(articleIds);
+    }
+
+    List<ArticleData> articles = articleReadService.findArticles(articleIds);
+    fillExtraInfo(articles, currentUser);
+
+    return new CursorPager<>(articles, page.getDirection(), hasExtra);
   }
 
   public CursorPager<ArticleData> findUserFeedWithCursor(
           User user, CursorPageParameter<DateTime> page) {
-    List<String> followdUsers = userRelationshipQueryService.followedUsers(user.getId());
-    if (followdUsers.size() == 0) {
+    List<String> followedUsers = userRelationshipQueryService.followedUsers(user.getId());
+    if (followedUsers.isEmpty()) {
       return new CursorPager<>(new ArrayList<>(), page.getDirection(), false);
-    } else {
-      List<ArticleData> articles =
-              articleReadService.findArticlesOfAuthorsWithCursor(followdUsers, page);
-      boolean hasExtra = articles.size() > page.getLimit();
-      if (hasExtra) {
-        articles.remove(page.getLimit());
-      }
-      if (!page.isNext()) {
-        Collections.reverse(articles);
-      }
-      fillExtraInfo(articles, user);
-      return new CursorPager<>(articles, page.getDirection(), hasExtra);
     }
+
+    List<ArticleData> articles =
+            articleReadService.findArticlesOfAuthorsWithCursor(followedUsers, page);
+    boolean hasExtra = articles.size() > page.getLimit();
+    if (hasExtra) {
+      articles.remove(page.getLimit());
+    }
+    if (!page.isNext()) {
+      Collections.reverse(articles);
+    }
+    fillExtraInfo(articles, user);
+    return new CursorPager<>(articles, page.getDirection(), hasExtra);
   }
 
   public ArticleDataList findRecentArticles(
       String tag, String author, String favoritedBy, Page page, User currentUser) {
     List<String> articleIds = articleReadService.queryArticles(tag, author, favoritedBy, page);
     int articleCount = articleReadService.countArticle(tag, author, favoritedBy);
-    if (articleIds.size() == 0) {
+    if (articleIds.isEmpty()) {
       return new ArticleDataList(new ArrayList<>(), articleCount);
-    } else {
-      List<ArticleData> articles = articleReadService.findArticles(articleIds);
-      fillExtraInfo(articles, currentUser);
-      return new ArticleDataList(articles, articleCount);
     }
+
+    List<ArticleData> articles = articleReadService.findArticles(articleIds);
+    fillExtraInfo(articles, currentUser);
+    return new ArticleDataList(articles, articleCount);
   }
 
   public ArticleDataList findUserFeed(User user, Page page) {
-    List<String> followdUsers = userRelationshipQueryService.followedUsers(user.getId());
-    if (followdUsers.size() == 0) {
+    List<String> followedUsers = userRelationshipQueryService.followedUsers(user.getId());
+    if (followedUsers.isEmpty()) {
       return new ArticleDataList(new ArrayList<>(), 0);
-    } else {
-      List<ArticleData> articles = articleReadService.findArticlesOfAuthors(followdUsers, page);
-
-      List<String> articleIds = new ArrayList<>();
-
-      for (ArticleData articleData : articles) {
-        articleIds.add(articleData.getId());
-      }
-
-      List<ArticleFavoriteCount> favoritesCounts =
-              articleFavoritesReadService.articlesFavoriteCount(articleIds);
-      Map<String, Integer> countMap = new HashMap<>();
-      for (ArticleFavoriteCount item : favoritesCounts) {
-        countMap.put(item.getId(), item.getCount());
-      }
-      for (ArticleData articleData : articles) {
-        articleData.setFavoritesCount(countMap.get(articleData.getId()));
-      }
-      if (user != null) {
-        setIsFavorite(articles, user);
-
-        List<String> profileDataIds = new ArrayList<>();
-        for (ArticleData articleData : articles) {
-          if(articleData.getProfileData() != null) {
-            profileDataIds.add(articleData.getProfileData().getId());
-          }
-        }
-
-        Set<String> followingAuthors =
-                userRelationshipQueryService.followingAuthors(user.getId(), profileDataIds);
-        for (ArticleData articleData : articles) {
-          if (followingAuthors.contains(articleData.getProfileData().getId())) {
-            articleData.getProfileData().setFollowing(true);
-          }
-        }
-      }
-      int count = articleReadService.countFeedSize(followdUsers);
-      return new ArticleDataList(articles, count);
     }
+
+    List<ArticleData> articles = articleReadService.findArticlesOfAuthors(followedUsers, page);
+
+    List<String> articleIds = new ArrayList<>();
+
+    for (ArticleData articleData : articles) {
+      articleIds.add(articleData.getId());
+    }
+
+    List<ArticleFavoriteCount> favoritesCounts =
+            articleFavoritesReadService.articlesFavoriteCount(articleIds);
+    Map<String, Integer> countMap = new HashMap<>();
+    for (ArticleFavoriteCount item : favoritesCounts) {
+      countMap.put(item.getId(), item.getCount());
+    }
+    for (ArticleData articleData : articles) {
+      articleData.setFavoritesCount(countMap.get(articleData.getId()));
+    }
+    if (user != null) {
+      setIsFavorite(articles, user);
+
+      List<String> profileDataIds = new ArrayList<>();
+      for (ArticleData articleData : articles) {
+        if(articleData.getProfileData() != null) {
+          profileDataIds.add(articleData.getProfileData().getId());
+        }
+      }
+
+      Set<String> followingAuthors =
+              userRelationshipQueryService.followingAuthors(user.getId(), profileDataIds);
+      for (ArticleData articleData : articles) {
+        if (followingAuthors.contains(articleData.getProfileData().getId())) {
+          articleData.getProfileData().setFollowing(true);
+        }
+      }
+    }
+    int count = articleReadService.countFeedSize(followedUsers);
+    return new ArticleDataList(articles, count);
   }
 
   private void fillExtraInfo(List<ArticleData> articles, User currentUser) {

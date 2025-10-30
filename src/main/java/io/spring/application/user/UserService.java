@@ -17,6 +17,9 @@ import org.springframework.validation.annotation.Validated;
 @Service
 @Validated
 public class UserService {
+
+  private static final String EMPTY_BIO = "";
+
   private UserRepository userRepository;
   private String defaultImage;
   private PasswordEncoder passwordEncoder;
@@ -37,7 +40,7 @@ public class UserService {
             registerParam.getEmail(),
             registerParam.getUsername(),
             passwordEncoder.encode(registerParam.getPassword()),
-            "",
+            EMPTY_BIO,
             defaultImage);
     userRepository.save(user);
     return user;
