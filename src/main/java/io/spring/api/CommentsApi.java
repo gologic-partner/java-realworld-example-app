@@ -1,5 +1,8 @@
 package io.spring.api;
 
+import static io.spring.api.ResponseFactory.commentResponse;
+import static io.spring.api.ResponseFactory.commentsResponse;
+
 import com.fasterxml.jackson.annotation.JsonRootName;
 import io.spring.api.exception.NoAuthorizationException;
 import io.spring.api.exception.ResourceNotFoundException;
@@ -11,9 +14,7 @@ import io.spring.core.comment.Comment;
 import io.spring.core.comment.CommentRepository;
 import io.spring.core.service.AuthorizationService;
 import io.spring.core.user.User;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -56,12 +57,7 @@ public class CommentsApi {
     Article article =
         articleRepository.findBySlug(slug).orElseThrow(ResourceNotFoundException::new);
     List<CommentData> comments = commentQueryService.findByArticleId(article.getId(), user);
-    return ResponseEntity.ok(
-        new HashMap<String, Object>() {
-          {
-            put("comments", comments);
-          }
-        });
+    return ResponseEntity.ok(commentsResponse(comments));
   }
 
   @RequestMapping(path = "{id}", method = RequestMethod.DELETE)
@@ -82,14 +78,6 @@ public class CommentsApi {
               return ResponseEntity.noContent().build();
             })
         .orElseThrow(ResourceNotFoundException::new);
-  }
-
-  private Map<String, Object> commentResponse(CommentData commentData) {
-    return new HashMap<String, Object>() {
-      {
-        put("comment", commentData);
-      }
-    };
   }
 }
 

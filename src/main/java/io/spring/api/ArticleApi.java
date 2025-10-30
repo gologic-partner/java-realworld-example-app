@@ -1,5 +1,7 @@
 package io.spring.api;
 
+import static io.spring.api.ResponseFactory.articleResponse;
+
 import io.spring.api.exception.NoAuthorizationException;
 import io.spring.api.exception.ResourceNotFoundException;
 import io.spring.application.ArticleQueryService;
@@ -10,8 +12,6 @@ import io.spring.core.article.Article;
 import io.spring.core.article.ArticleRepository;
 import io.spring.core.service.AuthorizationService;
 import io.spring.core.user.User;
-import java.util.HashMap;
-import java.util.Map;
 import javax.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -76,13 +76,5 @@ public class ArticleApi {
               return ResponseEntity.noContent().build();
             })
         .orElseThrow(ResourceNotFoundException::new);
-  }
-
-  private Map<String, Object> articleResponse(ArticleData articleData) {
-    return new HashMap<String, Object>() {
-      {
-        put("article", articleData);
-      }
-    };
   }
 }

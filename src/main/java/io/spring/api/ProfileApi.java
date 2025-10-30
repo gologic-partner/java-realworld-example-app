@@ -1,12 +1,13 @@
 package io.spring.api;
 
+import static io.spring.api.ResponseFactory.profileResponse;
+
 import io.spring.api.exception.ResourceNotFoundException;
 import io.spring.application.ProfileQueryService;
 import io.spring.application.data.ProfileData;
 import io.spring.core.user.FollowRelation;
 import io.spring.core.user.User;
 import io.spring.core.user.UserRepository;
-import java.util.HashMap;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +31,7 @@ public class ProfileApi {
       @PathVariable("username") String username, @AuthenticationPrincipal User user) {
     return profileQueryService
         .findByUsername(username, user)
-        .map(this::profileResponse)
+        .map(profile -> ResponseEntity.ok(profileResponse(profile)))
         .orElseThrow(ResourceNotFoundException::new);
   }
 
@@ -43,7 +44,8 @@ public class ProfileApi {
             target -> {
               FollowRelation followRelation = new FollowRelation(user.getId(), target.getId());
               userRepository.saveRelation(followRelation);
-              return profileResponse(profileQueryService.findByUsername(username, user).get());
+              return ResponseEntity.ok(
+                  profileResponse(profileQueryService.findByUsername(username, user).get()));
             })
         .orElseThrow(ResourceNotFoundException::new);
   }
@@ -59,20 +61,12 @@ public class ProfileApi {
           .map(
               relation -> {
                 userRepository.removeRelation(relation);
-                return profileResponse(profileQueryService.findByUsername(username, user).get());
+                return ResponseEntity.ok(
+                    profileResponse(profileQueryService.findByUsername(username, user).get()));
               })
           .orElseThrow(ResourceNotFoundException::new);
     } else {
       throw new ResourceNotFoundException();
     }
-  }
-
-  private ResponseEntity profileResponse(ProfileData profile) {
-    return ResponseEntity.ok(
-        new HashMap<String, Object>() {
-          {
-            put("profile", profile);
-          }
-        });
   }
 }

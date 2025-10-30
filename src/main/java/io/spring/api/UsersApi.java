@@ -1,5 +1,6 @@
 package io.spring.api;
 
+import static io.spring.api.ResponseFactory.userResponse;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 import com.fasterxml.jackson.annotation.JsonRootName;
@@ -12,8 +13,6 @@ import io.spring.application.user.UserService;
 import io.spring.core.service.JwtService;
 import io.spring.core.user.User;
 import io.spring.core.user.UserRepository;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import javax.validation.Valid;
 import javax.validation.constraints.Email;
@@ -55,14 +54,6 @@ public class UsersApi {
     } else {
       throw new InvalidAuthenticationException();
     }
-  }
-
-  private Map<String, Object> userResponse(UserWithToken userWithToken) {
-    return new HashMap<String, Object>() {
-      {
-        put("user", userWithToken);
-      }
-    };
   }
 }
 
