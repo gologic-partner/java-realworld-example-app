@@ -49,16 +49,16 @@ public class Article {
   }
 
   public void update(String title, String description, String body) {
-    if (!Util.isEmpty(title)) {
+    if (!Util.isNullOrEmpty(title)) {
       this.title = title;
       this.slug = toSlug(title);
       this.updatedAt = new DateTime();
     }
-    if (!Util.isEmpty(description)) {
+    if (!Util.isNullOrEmpty(description)) {
       this.description = description;
       this.updatedAt = new DateTime();
     }
-    if (!Util.isEmpty(body)) {
+    if (!Util.isNullOrEmpty(body)) {
       this.body = body;
       this.updatedAt = new DateTime();
     }
