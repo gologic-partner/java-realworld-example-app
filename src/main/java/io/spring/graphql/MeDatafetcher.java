@@ -36,7 +36,8 @@ public class MeDatafetcher {
     io.spring.core.user.User user = (io.spring.core.user.User) authentication.getPrincipal();
     UserData userData =
         userQueryService.findById(user.getId()).orElseThrow(ResourceNotFoundException::new);
-    UserWithToken userWithToken = new UserWithToken(userData, authorization.split(" ")[1]);
+    String token = io.spring.api.security.AuthorizationHeaderParser.extractTokenOrThrow(authorization);
+    UserWithToken userWithToken = new UserWithToken(userData, token);
     User result =
         User.newBuilder()
             .email(userWithToken.getEmail())
