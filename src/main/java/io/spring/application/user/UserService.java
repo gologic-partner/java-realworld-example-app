@@ -77,30 +77,31 @@ class UpdateUserValidator implements ConstraintValidator<UpdateUserConstraint, U
     String inputUsername = value.getParam().getUsername();
     final User targetUser = value.getTargetUser();
 
-    boolean isEmailValid =
-        userRepository.findByEmail(inputEmail).map(user -> user.equals(targetUser)).orElse(true);
-    boolean isUsernameValid =
-        userRepository
-            .findByUsername(inputUsername)
-            .map(user -> user.equals(targetUser))
-            .orElse(true);
+    boolean isEmailValid = isFieldAvailableForUser(inputEmail, targetUser, userRepository::findByEmail);
+    boolean isUsernameValid = isFieldAvailableForUser(inputUsername, targetUser, userRepository::findByUsername);
+
     if (isEmailValid && isUsernameValid) {
       return true;
-    } else {
-      context.disableDefaultConstraintViolation();
-      if (!isEmailValid) {
-        context
-            .buildConstraintViolationWithTemplate("email already exist")
-            .addPropertyNode("email")
-            .addConstraintViolation();
-      }
-      if (!isUsernameValid) {
-        context
-            .buildConstraintViolationWithTemplate("username already exist")
-            .addPropertyNode("username")
-            .addConstraintViolation();
-      }
-      return false;
     }
+
+    context.disableDefaultConstraintViolation();
+    if (!isEmailValid) {
+      addConstraintViolation(context, "email", "email already exist");
+    }
+    if (!isUsernameValid) {
+      addConstraintViolation(context, "username", "username already exist");
+    }
+    return false;
+  }
+
+  private boolean isFieldAvailableForUser(String fieldValue, User targetUser, java.util.function.Function<String, java.util.Optional<User>> finder) {
+    return finder.apply(fieldValue).map(user -> user.equals(targetUser)).orElse(true);
+  }
+
+  private void addConstraintViolation(ConstraintValidatorContext context, String property, String message) {
+    context
+        .buildConstraintViolationWithTemplate(message)
+        .addPropertyNode(property)
+        .addConstraintViolation();
   }
 }
