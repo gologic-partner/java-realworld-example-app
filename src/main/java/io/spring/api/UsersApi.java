@@ -58,11 +58,9 @@ public class UsersApi {
   }
 
   private Map<String, Object> userResponse(UserWithToken userWithToken) {
-    return new HashMap<String, Object>() {
-      {
-        put("user", userWithToken);
-      }
-    };
+    Map<String, Object> response = new HashMap<>();
+    response.put("user", userWithToken);
+    return response;
   }
 }
 

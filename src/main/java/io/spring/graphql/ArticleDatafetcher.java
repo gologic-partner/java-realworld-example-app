@@ -28,6 +28,7 @@ import io.spring.graphql.types.ArticleEdge;
 import io.spring.graphql.types.ArticlesConnection;
 import io.spring.graphql.types.Profile;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.joda.time.format.ISODateTimeFormat;
@@ -307,13 +308,10 @@ public class ArticleDatafetcher {
             .findById(article.getId(), current)
             .orElseThrow(ResourceNotFoundException::new);
     Article articleResult = buildArticleResult(articleData);
+    Map<String, Object> context = new HashMap<>();
+    context.put(articleData.getSlug(), articleData);
     return DataFetcherResult.<Article>newResult()
-        .localContext(
-            new HashMap<String, Object>() {
-              {
-                put(articleData.getSlug(), articleData);
-              }
-            })
+        .localContext(context)
         .data(articleResult)
         .build();
   }
@@ -328,13 +326,10 @@ public class ArticleDatafetcher {
             .findById(comment.getArticleId(), current)
             .orElseThrow(ResourceNotFoundException::new);
     Article articleResult = buildArticleResult(articleData);
+    Map<String, Object> context = new HashMap<>();
+    context.put(articleData.getSlug(), articleData);
     return DataFetcherResult.<Article>newResult()
-        .localContext(
-            new HashMap<String, Object>() {
-              {
-                put(articleData.getSlug(), articleData);
-              }
-            })
+        .localContext(context)
         .data(articleResult)
         .build();
   }
@@ -345,13 +340,10 @@ public class ArticleDatafetcher {
     ArticleData articleData =
         articleQueryService.findBySlug(slug, current).orElseThrow(ResourceNotFoundException::new);
     Article articleResult = buildArticleResult(articleData);
+    Map<String, Object> context = new HashMap<>();
+    context.put(articleData.getSlug(), articleData);
     return DataFetcherResult.<Article>newResult()
-        .localContext(
-            new HashMap<String, Object>() {
-              {
-                put(articleData.getSlug(), articleData);
-              }
-            })
+        .localContext(context)
         .data(articleResult)
         .build();
   }

@@ -7,6 +7,7 @@ import io.spring.application.article.NewArticleParam;
 import io.spring.core.article.Article;
 import io.spring.core.user.User;
 import java.util.HashMap;
+import java.util.Map;
 import javax.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -29,12 +30,9 @@ public class ArticlesApi {
   public ResponseEntity createArticle(
       @Valid @RequestBody NewArticleParam newArticleParam, @AuthenticationPrincipal User user) {
     Article article = articleCommandService.createArticle(newArticleParam, user);
-    return ResponseEntity.ok(
-        new HashMap<String, Object>() {
-          {
-            put("article", articleQueryService.findById(article.getId(), user).get());
-          }
-        });
+    Map<String, Object> response = new HashMap<>();
+    response.put("article", articleQueryService.findById(article.getId(), user).get());
+    return ResponseEntity.ok(response);
   }
 
   @GetMapping(path = "feed")

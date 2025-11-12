@@ -56,12 +56,9 @@ public class CommentsApi {
     Article article =
         articleRepository.findBySlug(slug).orElseThrow(ResourceNotFoundException::new);
     List<CommentData> comments = commentQueryService.findByArticleId(article.getId(), user);
-    return ResponseEntity.ok(
-        new HashMap<String, Object>() {
-          {
-            put("comments", comments);
-          }
-        });
+    Map<String, Object> response = new HashMap<>();
+    response.put("comments", comments);
+    return ResponseEntity.ok(response);
   }
 
   @RequestMapping(path = "{id}", method = RequestMethod.DELETE)
@@ -85,11 +82,9 @@ public class CommentsApi {
   }
 
   private Map<String, Object> commentResponse(CommentData commentData) {
-    return new HashMap<String, Object>() {
-      {
-        put("comment", commentData);
-      }
-    };
+    Map<String, Object> response = new HashMap<>();
+    response.put("comment", commentData);
+    return response;
   }
 }
 
